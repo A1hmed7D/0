@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Mode Toggle Button</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .toggle-container {
+            perspective: 500px;
+        }
+        
+        .toggle-btn {
+            transform-style: preserve-3d;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            position: relative;
+        }
+        
+        .toggle-btn:active {
+            transform: translateY(5px);
+        }
+        
+        .front, .back {
+            backface-visibility: hidden;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .front {
+            transform: rotateY(0deg);
+            z-index: 2;
+        }
+        
+        .back {
+            transform: rotateY(180deg);
+        }
+        
+        .night .toggle-btn {
+            transform: rotateY(180deg);
+        }
+        
+        body.night {
+            background-color: #1a202c;
+            color: #f7fafc;
+            transition: all 0.5s ease;
+        }
+        
+        body:not(.night) {
+            background-color: #f7fafc;
+            color: #1a202c;
+            transition: all 0.5s ease;
+        }
+        
+        .toggle-shadow {
+            filter: drop-shadow(0 10px 8px rgba(0, 0, 0, 0.1));
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center transition-colors duration-500">
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold mb-4">Theme Switcher</h1>
+        <p class="text-lg">Click the 3D button to toggle between light and dark mode</p>
+    </div>
+    
+    <div class="toggle-container mb-12">
+        <div class="toggle-shadow">
+            <button id="toggleBtn" class="toggle-btn w-24 h-24 relative">
+                <div class="front bg-yellow-400 text-gray-800">
+                    <i class="fas fa-sun text-3xl"></i>
+                </div>
+                <div class="back bg-indigo-900 text-white">
+                    <i class="fas fa-moon text-3xl"></i>
+                </div>
+            </button>
+        </div>
+    </div>
+    
+    <div class="max-w-md p-8 rounded-xl bg-white dark:bg-gray-800 shadow-lg transition-all duration-500">
+        <h2 class="text-2xl font-semibold mb-4 dark:text-white">Current Theme: <span id="themeStatus" class="font-bold">Light</span></h2>
+        <p class="text-gray-700 dark:text-gray-300">
+            This is some sample content that changes appearance based on the selected theme. 
+            The 3D toggle button above uses CSS transforms to create a flipping effect when clicked.
+        </p>
+    </div>
+    
+    <script>
+        const toggleBtn = document.getElementById('toggleBtn');
+        const body = document.body;
+        const themeStatus = document.getElementById('themeStatus');
+        
+        // Check for saved theme preference or use preferred color scheme
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && prefersDarkScheme.matches)) {
+            body.classList.add('night');
+            themeStatus.textContent = 'Dark';
+        }
+        
+        toggleBtn.addEventListener('click', () => {
+            body.classList.toggle('night');
+            
+            // Update status text
+            if (body.classList.contains('night')) {
+                themeStatus.textContent = 'Dark';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                themeStatus.textContent = 'Light';
+                localStorage.setItem('theme', 'light');
+            }
+        });
+        
+        // Listen for system theme changes
+        prefersDarkScheme.addEventListener('change', e => {
+            if (localStorage.getItem('theme') === null) {
+                if (e.matches) {
+                    body.classList.add('night');
+                    themeStatus.textContent = 'Dark';
+                } else {
+                    body.classList.remove('night');
+                    themeStatus.textContent = 'Light';
+                }
+            }
+        });
+    </script>
+</body>
